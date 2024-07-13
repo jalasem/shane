@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shane_store/models/todo.dart';
 
 class HomeScreenController extends GetxController {
-  var todos = <String>[].obs;
+  var todos = <TodoModel>[].obs;
 
   late TextEditingController newTodoController;
 
@@ -27,12 +28,19 @@ class HomeScreenController extends GetxController {
       return;
     }
 
-    todos.add(newTodo);
+    todos.add(TodoModel(title: newTodo));
     newTodoController.clear();
   }
 
   void removeTodo(index) {
     todos.removeAt(index);
+  }
+
+  void toggleTodo(index) {
+    final previousTodo = todos[index];
+
+    todos[index] =
+        TodoModel(title: previousTodo.title, isDone: !previousTodo.isDone);
   }
 }
 
@@ -57,6 +65,7 @@ class HomeScreen extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       controller: controller.newTodoController,
+                      maxLength: 100,
                       decoration: const InputDecoration(
                         hintText: 'Enter new Todo',
                       ),
@@ -72,9 +81,24 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                   child: ListView.builder(
                 itemCount: todos.length,
-                itemBuilder: (context, index) => ListTile(
-                  title: Text(todos[index]),
-                ),
+                itemBuilder: (context, index) {
+                  final todo = todos[index];
+
+                  return Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => controller.toggleTodo(index),
+                        icon: Icon(
+                          todo.isDone
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(todo.title),
+                    ],
+                  );
+                },
               ))
             ],
           ),
