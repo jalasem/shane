@@ -2,14 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class HomeScreenController extends GetxController {
-  var count = 0.obs;
+  var todos = <String>[].obs;
 
-  void increment() {
-    count.value++;
+  late TextEditingController newTodoController;
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    newTodoController = TextEditingController();
   }
 
-  void decrement() {
-    count.value--;
+  @override
+  void onClose() {
+    super.onClose();
+
+    newTodoController.dispose();
+  }
+
+  void addTodo() {
+    final newTodo = newTodoController.text.trim();
+
+    if (newTodo.isEmpty) {
+      return;
+    }
+
+    todos.add(newTodo);
+    newTodoController.clear();
+  }
+
+  void removeTodo(index) {
+    todos.removeAt(index);
   }
 }
 
@@ -21,32 +44,40 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final count = controller.count.value;
+      final todos = controller.todos;
 
       return Scaffold(
-          body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text('Count $count'),
-            const SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: controller.decrement,
-                  child: const Text('Decrease'),
+          body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 20),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller.newTodoController,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter new Todo',
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: controller.addTodo,
+                    child: const Text('Add'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                  child: ListView.builder(
+                itemCount: todos.length,
+                itemBuilder: (context, index) => ListTile(
+                  title: Text(todos[index]),
                 ),
-                ElevatedButton(
-                  onPressed: controller.increment,
-                  child: const Text('Increase'),
-                ),
-              ],
-            ),
-          ],
+              ))
+            ],
+          ),
         ),
       ));
     });
